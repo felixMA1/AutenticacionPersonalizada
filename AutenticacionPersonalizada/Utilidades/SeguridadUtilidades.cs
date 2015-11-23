@@ -34,20 +34,26 @@ namespace AutenticacionPersonalizada.Utilidades
 
 
         /*
-        Cifrado asimetrico: Cuando tenga q compartir el contenido con otros.
-        Cifrado simetrico:    
-            */
+            Cifrado asimetrico: Cuando tenga q compartir el contenido con otros.
+            Cifrado simetrico:    
+        */
 
         public static byte[] GeyKey(String txt)
         {
+            //Genera una password (array de bytes) de forma aleatoria
+            //desde un origen. El origen es txt. Null es el salt;un numero para el calculo aleatorio.
             return new PasswordDeriveBytes(txt,null).GetBytes(32);
         }
 
         public static String Cifrar(String contenido, String clave)
         {
+            //tipo de codificacion
             var encoding = new UTF8Encoding();
+            //determina cual es el algoritmo de cifrado
             var cripto = new RijndaelManaged();
+            //texto q yo quiero cifrar
             byte[] cifrado;
+            //array que contiene el IV mas el txt cifrado
             byte[] retorno;
             //convierte la clave en array de bytes
             byte[] key = encoding.GetBytes(clave);
@@ -65,28 +71,26 @@ namespace AutenticacionPersonalizada.Utilidades
             cripto.IV.CopyTo(retorno, 0);
             cifrado.CopyTo(retorno, cripto.IV.Length);
 
-            return encoding.GetString(retorno);
+            return Convert.ToBase64String(retorno);
         }
 
-        public static String DesCifrar(String contenido, String clave)
+        public static String DesCifrar(byte[] contenido, String clave)
         {
             //tipo de codificacion
             UTF8Encoding encoding = new UTF8Encoding();
             var cripto = new RijndaelManaged();
             //IV vacio del tamaño del IV por defecto del Rijndael
             var ivTemp = new byte[cripto.IV.Length];
-            //datos es el contenido cifrado que lo hemos pasado como UTF8 pero q viene originalmente de un texto
-            var datos = encoding.GetBytes(contenido);
             //la clave tiene q ser la misma para cifrar y descifrar 
-            var key = encoding.GetBytes(clave);
+            var key = GeyKey(clave);
             //creo un array cifrado. La longitud es tdo lo q tengo menos el IV 
-            var cifrado = new byte[datos.Length - ivTemp.Length];
+            var cifrado = new byte[contenido.Length - ivTemp.Length];
 
             cripto.Key = key;
             //(de dnd voy a sacar los datos, dnd voy a escribir los datos, cuantos datos voy a escribir)
-            Array.Copy(datos,ivTemp,ivTemp.Length);
+            Array.Copy(contenido,ivTemp,ivTemp.Length);
             //(de dnd voy a sacar los datos, dnd quieres empezar a copiar, en dnd, desde dnd, hasta dnd)
-            Array.Copy(datos,ivTemp.Length,cifrado,0,cifrado.Length);
+            Array.Copy(contenido,ivTemp.Length,cifrado,0,cifrado.Length);
 
             cripto.IV = ivTemp;         
             var descifrado = cripto.CreateDecryptor().TransformFinalBlock(cifrado, 0, cifrado.Length);

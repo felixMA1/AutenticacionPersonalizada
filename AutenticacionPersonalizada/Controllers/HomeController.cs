@@ -13,7 +13,10 @@ namespace AutenticacionPersonalizada.Controllers
         public ActionResult Index()
         {
             var cifrado = SeguridadUtilidades.Cifrar("Hola don Pepito", "Enunlugardelamanchadecuyonombrenoquieroacordarme");
+
+            var data = Convert.FromBase64String(cifrado);
             var descifrado = SeguridadUtilidades.DesCifrar(cifrado, "Enunlugardelamanchadecuyonombrenoquieroacordarme");
+
             return View();
         }
     }

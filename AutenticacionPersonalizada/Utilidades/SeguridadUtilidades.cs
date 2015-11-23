@@ -56,7 +56,7 @@ namespace AutenticacionPersonalizada.Utilidades
             //array que contiene el IV mas el txt cifrado
             byte[] retorno;
             //convierte la clave en array de bytes
-            byte[] key = encoding.GetBytes(clave);
+            byte[] key = GeyKey(clave);
 
             cripto.Key = key;
             //genera array de inicializacion
